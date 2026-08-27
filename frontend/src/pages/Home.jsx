@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import CartDrawer from "@/components/CartDrawer";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
-import PageLoader from "@/components/PageLoader";
+import HeroBackground from "@/components/HeroBackground";
 
 const BACKEND_URL = "http://localhost:5000";
 
@@ -59,26 +59,27 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <StoreHeader categories={categories} />
 
-      <section className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-6 py-20 sm:py-28 text-center">
-          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-gray-400 mb-4">
-            New season, new picks
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
-            Shop the collection
-          </h1>
-          <p className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg mb-8">
-            Quality clothes and shoes, picked for you. Browse the catalog below and add
-            what you like to your cart.
-          </p>
-          <a
-            href="#catalog"
-            className="inline-block bg-black text-white px-6 py-3 rounded-md text-sm font-semibold hover:bg-gray-800 transition-colors"
-          >
-            Start shopping
-          </a>
-        </div>
-      </section>
+      <section className="bg-white border-b relative overflow-hidden">
+      <HeroBackground />
+      <div className="max-w-6xl mx-auto px-6 py-20 sm:py-28 text-center relative z-10">
+        <span className="inline-block text-xs font-semibold tracking-wider uppercase text-gray-400 mb-4">
+          New season, new picks
+        </span>
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
+          Shop the collection
+        </h1>
+        <p className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg mb-8">
+          Quality clothes and shoes, picked for you. Browse the catalog below and add
+          what you like to your cart.
+        </p>
+      <a
+        href="#catalog"
+        className="inline-block bg-black text-white px-6 py-3 rounded-md text-sm font-semibold hover:bg-gray-800 transition-colors relative z-10"
+      >
+        Start shopping
+      </a>
+    </div>
+  </section>
 
       {categories.length > 0 && (
         <section className="bg-white border-b">
