@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ordersApi, usersApi } from "@/api/entities";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import PageLoader from "@/components/PageLoader";
+import OrderDetailDialog from "@/components/OrderDetailDialog";
 
 const statusVariant = {
   pending: "warning",
@@ -28,6 +28,7 @@ const statusOptions = [
 export default function Orders() {
   const crud = useEntityCrud(ordersApi, { entityLabel: "Order" });
   const [users, setUsers] = useState([]);
+  const [viewingOrderId, setViewingOrderId] = useState(null);
 
   useEffect(() => {
     usersApi.getAll().then(setUsers).catch(() => {});
@@ -45,7 +46,19 @@ export default function Orders() {
   }, [crud.reload]);
 
   const columns = [
-    { key: "id", label: "Order", mono: true, render: (row) => `#${row.id}` },
+      {
+    key: "id",
+    label: "Order",
+    mono: true,
+    render: (row) => (
+      <button
+        onClick={() => setViewingOrderId(row.id)}
+        className="text-primary underline underline-offset-2 hover:opacity-80"
+      >
+        #{row.id}
+      </button>
+    ),
+  },
     { key: "user_name", label: "Customer" },
     {
       key: "total_amount",
@@ -132,6 +145,8 @@ export default function Orders() {
         deleting={crud.deleting}
         entityLabel="order"
       />
+
+      <OrderDetailDialog orderId={viewingOrderId} onClose={() => setViewingOrderId(null)} />
     </>
   );
 }
