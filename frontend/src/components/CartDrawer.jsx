@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-
-const BACKEND_URL = "http://localhost:5000";
+import { BACKEND_URL } from "@/api/config";
 
 export default function CartDrawer() {
   const { cartOpen, setCartOpen, cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -22,7 +21,7 @@ export default function CartDrawer() {
       <div className="relative w-full max-w-md bg-white h-full shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="font-bold text-lg">Your Cart</h2>
-          <button onClick={() => setCartOpen(false)} className="p-1 rounded hover:bg-gray-100">
+          <button aria-label="Close cart" onClick={() => setCartOpen(false)} className="p-1 rounded hover:bg-gray-100">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -53,6 +52,7 @@ export default function CartDrawer() {
 
                   <div className="flex items-center gap-1 border rounded-md">
                     <button
+                      aria-label={`Decrease ${item.name} quantity`}
                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                       className="p-1 hover:bg-gray-100"
                     >
@@ -60,6 +60,7 @@ export default function CartDrawer() {
                     </button>
                     <span className="text-sm w-5 text-center">{item.quantity}</span>
                     <button
+                      aria-label={`Increase ${item.name} quantity`}
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="p-1 hover:bg-gray-100"
                     >
@@ -68,6 +69,7 @@ export default function CartDrawer() {
                   </div>
 
                   <button
+                    aria-label={`Remove ${item.name} from cart`}
                     onClick={() => removeFromCart(item.id)}
                     className="p-1.5 text-red-500 hover:bg-red-50 rounded"
                   >

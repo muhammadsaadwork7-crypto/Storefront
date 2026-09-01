@@ -7,8 +7,7 @@ import CartDrawer from "@/components/CartDrawer";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 import HeroBackground from "@/components/HeroBackground";
-
-const BACKEND_URL = "http://localhost:5000";
+import { BACKEND_URL } from "@/api/config";
 
 export default function Home() {
   const { addToCart } = useCart();
@@ -22,6 +21,7 @@ export default function Home() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [addingId, setAddingId] = useState(null);
   const [message, setMessage] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     Promise.all([axiosClient.get("/products"), axiosClient.get("/categories")])
@@ -29,7 +29,7 @@ export default function Home() {
         setProducts(productsRes.data);
         setCategories(categoriesRes.data);
       })
-      .catch((err) => console.error("Failed to load storefront data:", err))
+      .catch((err) => setLoadError(err.response?.data?.error || "Could not load the catalog."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -138,6 +138,8 @@ export default function Home() {
 
         {loading ? (
           <div className="text-center text-gray-500 py-16">Loading products…</div>
+        ) : loadError ? (
+          <div className="text-center text-red-600 py-16">{loadError}</div>
         ) : filteredProducts.length === 0 ? (
           <p className="text-center text-gray-500 py-16">No products found.</p>
         ) : (

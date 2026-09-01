@@ -8,8 +8,8 @@ import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 import CartDrawer from "@/components/CartDrawer";
 import PageLoader from "@/components/PageLoader";
-
-const BACKEND_URL = "http://localhost:5000";
+import { BACKEND_URL } from "@/api/config";
+import MediaGallery from "@/components/MediaGallery";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -23,11 +23,13 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     setQuantity(1);
     setMessage(null);
+    setLoadError(null);
 
     Promise.all([
       axiosClient.get(`/products/${id}`),
@@ -37,7 +39,7 @@ export default function ProductDetail() {
         setProduct(productRes.data);
         setCategories(categoriesRes.data);
       })
-      .catch((err) => console.error("Failed to load product:", err))
+      .catch((err) => setLoadError(err.response?.data?.error || "Could not load this product."))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -66,7 +68,7 @@ if (loading) {
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-gray-500">
-        <p>Product not found.</p>
+        <p>{loadError || "Product not found."}</p>
         <button onClick={() => navigate("/")} className="text-sm underline">
           Back to shop
         </button>
@@ -91,19 +93,7 @@ if (loading) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* Image */}
-          <div className="aspect-square bg-white border rounded-lg flex items-center justify-center overflow-hidden">
-            {product.image_url ? (
-              <img
-                src={`${BACKEND_URL}${product.image_url}`}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-6xl text-gray-200 font-bold">
-                {product.name.charAt(0)}
-              </span>
-            )}
-          </div>
+          <MediaGallery media={product.media} />
 
           {/* Details */}
           <div>

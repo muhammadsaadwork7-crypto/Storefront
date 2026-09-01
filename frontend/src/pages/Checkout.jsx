@@ -6,9 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
-import PageLoader from "@/components/PageLoader";
-
-const BACKEND_URL = "http://localhost:5000";
+import { BACKEND_URL } from "@/api/config";
 
 export default function Checkout() {
   const { cartItems, cartTotal, clearCart } = useCart();

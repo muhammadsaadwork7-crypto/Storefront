@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Images } from "lucide-react";
 import Topbar from "@/components/layout/Topbar";
 import PageHeader from "@/components/PageHeader";
 import DataTable from "@/components/DataTable";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { productsApi, categoriesApi, suppliersApi } from "@/api/entities";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { formatCurrency } from "@/lib/utils";
-import PageLoader from "@/components/PageLoader";
+import ProductMediaManager from "@/components/ProductMediaManager";
 
 function StockBadge({ stock }) {
   const n = Number(stock);
@@ -22,6 +23,7 @@ export default function Products() {
   const crud = useEntityCrud(productsApi, { entityLabel: "Product" });
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [managingMediaFor, setManagingMediaFor] = useState(null); // { id, name } or null
 
   useEffect(() => {
     categoriesApi.getAll().then(setCategories).catch(() => {});
@@ -42,6 +44,19 @@ export default function Products() {
       key: "stock",
       label: "Stock",
       render: (row) => <StockBadge stock={row.stock} />,
+    },
+    {
+      key: "media",
+      label: "Media",
+      render: (row) => (
+        <button
+          onClick={() => setManagingMediaFor({ id: row.id, name: row.name })}
+          className="text-primary hover:opacity-80"
+          title="Manage media"
+        >
+          <Images className="h-4 w-4" />
+        </button>
+      ),
     },
   ];
 
@@ -105,6 +120,12 @@ export default function Products() {
         deleting={crud.deleting}
         entityLabel="product"
       />
+
+      <ProductMediaManager
+      productId={managingMediaFor?.id}
+      productName={managingMediaFor?.name}
+      onClose={() => setManagingMediaFor(null)}
+    />
     </>
   );
 }

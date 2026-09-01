@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { paymentsApi, ordersApi } from "@/api/entities";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import PageLoader from "@/components/PageLoader";
 
 const statusVariant = {
   pending: "warning",

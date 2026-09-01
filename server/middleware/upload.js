@@ -12,4 +12,13 @@ const storage = multer.diskStorage({
   },
 });
 
-module.exports = multer({ storage });
+module.exports = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+      return cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
+    }
+    cb(null, true);
+  },
+});

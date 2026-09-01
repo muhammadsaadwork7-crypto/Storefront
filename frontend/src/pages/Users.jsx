@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { usersApi } from "@/api/entities";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { formatDate } from "@/lib/utils";
-import PageLoader from "@/components/PageLoader";
 
 const columns = [
   { key: "id", label: "ID", mono: true },

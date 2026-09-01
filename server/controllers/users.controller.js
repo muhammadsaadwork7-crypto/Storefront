@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const bcrypt = require('bcryptjs');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -25,9 +26,16 @@ exports.getOne = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
+    }
+    if (!['admin', 'customer'].includes(role || 'customer')) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
       'INSERT INTO users (name, email, password, role) VALUES ($1,$2,$3,$4) RETURNING id, name, email, role, created_at',
-      [name, email, password, role || 'customer']
+      [name, email, hashedPassword, role || 'customer']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {

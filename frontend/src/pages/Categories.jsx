@@ -6,7 +6,6 @@ import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import ErrorBanner from "@/components/ErrorBanner";
 import { categoriesApi } from "@/api/entities";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
-import PageLoader from "@/components/PageLoader";
 
 const columns = [
   { key: "id", label: "ID", mono: true },

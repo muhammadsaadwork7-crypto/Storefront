@@ -12,7 +12,6 @@ import {
   paymentsApi,
 } from "@/api/entities";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import PageLoader from "@/components/PageLoader";
 
 const statCards = [
   { key: "products", label: "Products", icon: Package, api: productsApi },

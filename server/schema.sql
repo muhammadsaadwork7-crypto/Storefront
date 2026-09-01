@@ -47,6 +47,9 @@ CREATE TABLE IF NOT EXISTS orders (
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   total_amount NUMERIC(10,2) DEFAULT 0,
   status VARCHAR(20) DEFAULT 'pending',
+  shipping_name VARCHAR(100),
+  shipping_address TEXT,
+  shipping_phone VARCHAR(30),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -66,6 +69,15 @@ CREATE TABLE IF NOT EXISTS payments (
   method VARCHAR(20) DEFAULT 'card',
   status VARCHAR(20) DEFAULT 'pending',
   paid_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 7. Cart items (one current cart per user and product)
+CREATE TABLE IF NOT EXISTS cart_items (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  UNIQUE (user_id, product_id)
 );
 
 -- Sample seed data

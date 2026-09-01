@@ -12,10 +12,11 @@ const paymentsRoutes = require('./routes/payments.routes');
 const errorHandler = require('./middleware/errorHandler');
 const cartRoutes = require('./routes/cart.routes');
 const authRoutes = require('./routes/auth.routes');
+const productMediaRoutes = require('./routes/productMedia.routes');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
 // Serve uploaded product images statically at /uploads/<filename>
@@ -29,6 +30,7 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/product-media', productMediaRoutes);
 
 app.get('/', (req, res) => res.send('API is running'));
 

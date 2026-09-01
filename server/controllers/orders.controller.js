@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { sendOrderConfirmationEmail } = require('../utils/mailer');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -53,12 +54,15 @@ exports.create = async (req, res, next) => {
 
     await client.query('BEGIN');
 
+    // Look up product names for the email while we validate stock
+    const itemsWithNames = [];
     for (const item of items) {
       const stockCheck = await client.query('SELECT stock, name FROM products WHERE id = $1', [item.product_id]);
       if (stockCheck.rows.length === 0) throw new Error(`Product ${item.product_id} not found`);
       if (stockCheck.rows[0].stock < item.quantity) {
         throw new Error(`Not enough stock for "${stockCheck.rows[0].name}" (only ${stockCheck.rows[0].stock} left)`);
       }
+      itemsWithNames.push({ ...item, product_name: stockCheck.rows[0].name });
     }
 
     const total = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
@@ -84,6 +88,14 @@ exports.create = async (req, res, next) => {
     );
 
     await client.query('COMMIT');
+
+    // Send the confirmation email — a failed email should never break a successful order
+    try {
+      await sendOrderConfirmationEmail(req.user.email, order, itemsWithNames);
+    } catch (emailErr) {
+      console.error('⚠️ Failed to send order confirmation email:', emailErr.message);
+    }
+
     res.status(201).json({ ...order, payment: paymentResult.rows[0] });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -95,6 +107,7 @@ exports.create = async (req, res, next) => {
     client.release();
   }
 };
+
 
 exports.update = async (req, res, next) => {
   try {

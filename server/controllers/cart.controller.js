@@ -24,6 +24,16 @@ exports.addToCart = async (req, res, next) => {
     const { product_id, quantity } = req.body;
     const user_id = req.user.id; // always the logged-in user
     if (!product_id) return res.status(400).json({ error: 'product_id is required' });
+    const requestedQuantity = quantity ?? 1;
+    if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+      return res.status(400).json({ error: 'Quantity must be a positive integer' });
+    }
+
+    const product = await pool.query('SELECT stock FROM products WHERE id = $1', [product_id]);
+    if (product.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
+    if (product.rows[0].stock < requestedQuantity) {
+      return res.status(400).json({ error: 'Not enough stock available' });
+    }
 
     const result = await pool.query(
       `INSERT INTO cart_items (user_id, product_id, quantity)
@@ -31,7 +41,7 @@ exports.addToCart = async (req, res, next) => {
        ON CONFLICT (user_id, product_id)
        DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity
        RETURNING *`,
-      [user_id, product_id, quantity || 1]
+      [user_id, product_id, requestedQuantity]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -42,12 +52,17 @@ exports.addToCart = async (req, res, next) => {
 exports.updateQuantity = async (req, res, next) => {
   try {
     const { quantity } = req.body;
-    if (quantity < 1) return res.status(400).json({ error: 'Quantity must be at least 1' });
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ error: 'Quantity must be a positive integer' });
+    }
     const result = await pool.query(
-      'UPDATE cart_items SET quantity = $1 WHERE id = $2 RETURNING *',
-      [quantity, req.params.id]
+      `UPDATE cart_items ci SET quantity = $1
+       FROM products p
+       WHERE ci.id = $2 AND ci.user_id = $3 AND ci.product_id = p.id AND $1 <= p.stock
+       RETURNING ci.*`,
+      [quantity, req.params.id, req.user.id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Cart item not found' });
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Cart item not found or quantity exceeds stock' });
     res.json(result.rows[0]);
   } catch (err) {
     next(err);
@@ -56,7 +71,10 @@ exports.updateQuantity = async (req, res, next) => {
 
 exports.removeFromCart = async (req, res, next) => {
   try {
-    const result = await pool.query('DELETE FROM cart_items WHERE id = $1 RETURNING *', [req.params.id]);
+    const result = await pool.query(
+      'DELETE FROM cart_items WHERE id = $1 AND user_id = $2 RETURNING *',
+      [req.params.id, req.user.id]
+    );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Cart item not found' });
     res.json({ message: 'Removed from cart' });
   } catch (err) {
